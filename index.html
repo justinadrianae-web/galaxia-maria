@@ -13,21 +13,39 @@
         #ui h1 { margin: 0; font-size: 2.5em; letter-spacing: 2px; text-shadow: 0px 0px 15px #ff0050; }
         #ui p { margin: 10px 0 0 0; color: #ffb3c6; font-size: 1.2em; font-weight: bold; }
 
+        /* Buscador de Coordenadas */
+        #search-container {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(20, 0, 10, 0.8); border: 2px solid #ff0050; border-radius: 30px;
+            padding: 10px 20px; display: flex; gap: 10px; z-index: 10; backdrop-filter: blur(5px);
+            box-shadow: 0 0 20px rgba(255, 0, 80, 0.4);
+        }
+        #coord-input {
+            background: transparent; border: none; color: white; font-size: 1em; outline: none;
+            text-align: center; width: 180px; font-family: monospace;
+        }
+        #coord-input::placeholder { color: #ffb3c6; opacity: 0.7; }
+        #search-btn {
+            background: linear-gradient(45deg, #ff0050, #c9184a); border: none; color: white; padding: 8px 20px;
+            border-radius: 20px; cursor: pointer; font-weight: bold; transition: 0.3s;
+        }
+        #search-btn:hover { transform: scale(1.05); box-shadow: 0 0 10px #ff0050; }
+
+        /* Ventana Emergente */
         #modal {
             display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(20, 0, 10, 0.95); 
-            border: 3px solid #ff0050;
+            background: rgba(20, 0, 10, 0.95); border: 3px solid #ff0050;
             padding: 40px; text-align: center; color: white; 
             box-shadow: 0 0 40px rgba(255, 0, 80, 0.5);
-            width: 85%; max-width: 550px; z-index: 100; backdrop-filter: blur(10px);
-            border-radius: 25px;
+            width: 85%; max-width: 550px; z-index: 100; backdrop-filter: blur(10px); border-radius: 25px;
         }
         #modal h2 { margin: 0 0 20px 0; font-size: 2.2em; color: #ff4d6d; text-shadow: 2px 2px 5px #000; font-weight: bold;}
         #modal p { font-size: 1.6em; line-height: 1.5; font-weight: 500; color: #fff0f3; font-style: italic; }
+        #modal-coord { display: block; margin-top: 20px; font-size: 1em; color: #ffb3c6; font-family: monospace; }
         
         #close-btn {
             background: linear-gradient(45deg, #ff0050, #c9184a); border: none; color: white; padding: 15px 40px; 
-            font-size: 1.2em; border-radius: 50px; cursor: pointer; margin-top: 30px; font-weight: bold;
+            font-size: 1.2em; border-radius: 50px; cursor: pointer; margin-top: 20px; font-weight: bold;
             box-shadow: 0 5px 20px rgba(255, 0, 80, 0.4); transition: 0.3s;
         }
         #close-btn:hover { transform: scale(1.05); box-shadow: 0 5px 30px rgba(255, 0, 80, 0.7); }
@@ -37,16 +55,22 @@
 
     <div id="ui">
         <h1>✨ Mi Universo Eres Tú ✨</h1>
-        <p>Toca la pantalla para la música 🎵<br>Tienes 100 estrellas por descubrir, mi amor 👇</p>
+        <p>Toca la pantalla para la música 🎵<br>Tienes 100 estrellas por descubrir 👇</p>
+    </div>
+
+    <div id="search-container">
+        <input type="text" id="coord-input" placeholder="Ej: 14.02.26">
+        <button id="search-btn" onclick="searchCoordinate()">Buscar</button>
     </div>
 
     <audio id="bg-music" loop hidden>
-        <source src="musica_maria.mp3" type="audio/mpeg">
+        <source src="Manuel%20Medrano%20-%20Donde%20Nadie%20Pueda%20Ir.mp3" type="audio/mpeg">
     </audio>
 
     <div id="modal">
         <h2 id="modal-title">Título</h2>
         <p id="modal-text">Mensaje</p>
+        <span id="modal-coord"></span><br>
         <button id="close-btn" onclick="document.getElementById('modal').style.display='none'">Te amo ❤️</button>
     </div>
 
@@ -58,7 +82,7 @@
         window.addEventListener('click', function() {
             const audio = document.getElementById('bg-music');
             if (audio.paused) {
-                audio.volume = 0.6; 
+                audio.volume = 0.5; 
                 audio.play().catch(e => console.log("Esperando interacción..."));
             }
         }, { once: true });
@@ -79,7 +103,7 @@
         controls.autoRotate = true;
         controls.autoRotateSpeed = 0.3;
 
-        // Fondo de Polvo Estelar (Para que no se vea vacío)
+        // Fondo de Polvo Estelar
         const particlesGeometry = new THREE.BufferGeometry();
         const particlesCount = 8000;
         const posArray = new Float32Array(particlesCount * 3);
@@ -93,10 +117,9 @@
             posArray[i+1] = r * Math.sin(phi) * Math.sin(theta);
             posArray[i+2] = r * Math.cos(phi) * 0.7; 
 
-            // Colores románticos: Rojos, rosas y toques de cian
-            colorsArray[i] = 0.8 + Math.random() * 0.2; // R
-            colorsArray[i+1] = Math.random() * 0.3; // G
-            colorsArray[i+2] = 0.4 + Math.random() * 0.4; // B
+            colorsArray[i] = 0.8 + Math.random() * 0.2; 
+            colorsArray[i+1] = Math.random() * 0.3; 
+            colorsArray[i+2] = 0.4 + Math.random() * 0.4; 
         }
         particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
         particlesGeometry.setAttribute('color', new THREE.BufferAttribute(colorsArray, 3));
@@ -110,40 +133,41 @@
         const haloGeom = new THREE.SphereGeometry(7, 16, 16);
         const haloMat = new THREE.MeshBasicMaterial({ color: 0xff0050, transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending });
 
-        // Lista de frases románticas y personalizadas
+        // Lista de frases con sus COORDENADAS EXACTAS
         const mensajesAmor = [
-            { t: "❤️ TE AMO ❤️", m: "Eres el amor de mi vida. Gracias por existir y por ser mi novia." },
-            { t: "✨ Mi Morenita", m: "Me encanta todo de ti. Eres la mujer más hermosa de este universo y de todos los demás." },
-            { t: "👑 Reina de mi Corazón", m: "Chiquita, gordita y absolutamente perfecta para mí. Te amo tal y como eres." },
-            { t: "🐱 Karen Favorita", m: "Te amo incluso más de lo que tus michis aman dormir (y eso ya es muchísimo decir)." },
-            { t: "🖤 Arte en tu Piel", m: "Cada tatuaje tuyo cuenta una historia, pero mi historia favorita es la que estamos escribiendo juntos." },
-            { t: "📱 Mi Trend Favorito", m: "Podría verte hacer TikToks todo el día. Tu personalidad divertida es mi batería." },
-            { t: "🔒 Lealtad Pura", m: "En un mundo tan loco, tu lealtad y tu amor son mi mayor refugio. Gracias por ser tan fiel." },
-            { t: "💖 Poema para ti", m: "Tardé un minuto en conocerte, pero me tomaría toda la eternidad olvidarte. Te amo." },
-            { t: "😍 Locura Hermosa", m: "Amo tu energía, amo cómo me haces reír, amo que seas tú." },
-            { t: "💫 Casualidad", m: "De todos los lugares y tiempos posibles, qué suerte tuve de coincidir contigo." },
-            { t: "🥰 Mi Lugar Seguro", m: "No importa qué pase allá afuera, mis brazos siempre serán tu hogar." },
-            { t: "💘 Te Amo", m: "Solo quería recordarte que te amo. Hoy, mañana y siempre." }
+            { t: "🎁 PARA MI NOVIA", m: "Hice este pedacito de universo solo para ti. ¡Feliz San Valentín, mi amor!", c: "14.02.26" },
+            { t: "❤️ TE AMO ❤️", m: "Eres el amor de mi vida. Gracias por existir y por ser mi novia.", c: "01.00.00" },
+            { t: "✨ Mi Morenita", m: "Me encanta todo de ti. Eres la mujer más hermosa de este universo.", c: "02.00.00" },
+            { t: "👑 Reina de mi Corazón", m: "Chiquita, gordita y absolutamente perfecta para mí. Te amo tal y como eres.", c: "03.00.00" },
+            { t: "🐱 Karen Favorita", m: "Te amo incluso más de lo que tus michis aman dormir (y eso ya es mucho).", c: "04.00.00" },
+            { t: "🖤 Arte en tu Piel", m: "Cada tatuaje tuyo cuenta una historia, pero mi favorita es la nuestra.", c: "05.00.00" },
+            { t: "📱 Mi Trend Favorito", m: "Podría verte hacer TikToks todo el día. Tu energía es mi batería.", c: "06.00.00" },
+            { t: "🔒 Lealtad Pura", m: "En un mundo tan loco, tu lealtad y tu amor son mi mayor refugio.", c: "07.00.00" },
+            { t: "💖 Poema para ti", m: "Tardé un minuto en conocerte, pero me tomaría toda la eternidad olvidarte.", c: "08.00.00" },
+            { t: "😍 Locura Hermosa", m: "Amo tu energía, amo cómo me haces reír, amo que seas tú.", c: "09.00.00" },
+            { t: "💫 Casualidad", m: "De todos los lugares y tiempos posibles, qué suerte tuve de coincidir contigo.", c: "10.00.00" },
+            { t: "🥰 Mi Lugar Seguro", m: "No importa qué pase allá afuera, mis brazos siempre serán tu hogar.", c: "11.00.00" }
         ];
 
-        // Crear exactamente 100 estrellas
+        // Generar 100 estrellas
         for(let i = 0; i < 100; i++) {
             const star = new THREE.Mesh(starGeometry, starMaterial);
-            // Distribuirlas para que sean fáciles de encontrar
             const spread = 180;
             star.position.set((Math.random() - 0.5) * spread, (Math.random() - 0.5) * spread, (Math.random() - 0.5) * spread);
             
-            // Asignar un mensaje de la lista (se repiten circularmente para llenar las 100)
-            const mensaje = mensajesAmor[i % mensajesAmor.length];
-            
-            // La primera estrella siempre será el "Te amo" principal
-            if(i === 0) {
-                star.userData = { title: "🎁 PARA MI NOVIA", text: "Hice este pedacito de universo solo para ti, porque tú eres el mío. ¡Feliz día mi amor!" };
-                star.scale.set(1.5, 1.5, 1.5); // Hacerla un poquito más grande
+            let data;
+            if(i < mensajesAmor.length) {
+                // Las estrellas principales
+                data = { title: mensajesAmor[i].t, text: mensajesAmor[i].m, coord: mensajesAmor[i].c };
+                if(i === 0) star.scale.set(1.5, 1.5, 1.5);
             } else {
-                star.userData = { title: mensaje.t, text: mensaje.m };
+                // El resto de las 100 estrellas repiten los mensajes pero tienen coordenadas secretas
+                let msgAleatorio = mensajesAmor[Math.floor(Math.random() * mensajesAmor.length)];
+                let coordSecreta = "99." + Math.floor(Math.random() * 90 + 10) + "." + i;
+                data = { title: msgAleatorio.t, text: msgAleatorio.m, coord: coordSecreta };
             }
 
+            star.userData = data;
             scene.add(star);
             clickableObjects.push(star);
             
@@ -155,22 +179,48 @@
         const raycaster = new THREE.Raycaster();
         const mouse = new THREE.Vector2();
 
+        function openModal(data) {
+            controls.autoRotate = false; 
+            document.getElementById('modal-title').innerHTML = data.title;
+            document.getElementById('modal-text').innerHTML = data.text;
+            document.getElementById('modal-coord').innerHTML = "Coordenada: " + data.coord;
+            document.getElementById('modal').style.display = 'block';
+        }
+
         function checkIntersection(clientX, clientY) {
             mouse.x = (clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(clientY / window.innerHeight) * 2 + 1;
             raycaster.setFromCamera(mouse, camera);
             
             const intersects = raycaster.intersectObjects(clickableObjects);
-            if (intersects.length > 0) {
-                controls.autoRotate = false; 
-                document.getElementById('modal-title').innerHTML = intersects[0].object.userData.title;
-                document.getElementById('modal-text').innerHTML = intersects[0].object.userData.text;
-                document.getElementById('modal').style.display = 'block';
-            }
+            if (intersects.length > 0) openModal(intersects[0].object.userData);
         }
 
-        window.addEventListener('click', (e) => { if(e.target.id !== 'close-btn') checkIntersection(e.clientX, e.clientY); });
-        window.addEventListener('touchstart', (e) => { if(e.target.id !== 'close-btn' && e.touches.length > 0) checkIntersection(e.touches[0].clientX, e.touches[0].clientY); });
+        window.addEventListener('click', (e) => { 
+            if(e.target.id !== 'close-btn' && e.target.id !== 'coord-input' && e.target.id !== 'search-btn') checkIntersection(e.clientX, e.clientY); 
+        });
+        window.addEventListener('touchstart', (e) => { 
+            if(e.target.id !== 'close-btn' && e.target.id !== 'coord-input' && e.target.id !== 'search-btn') {
+                if(e.touches.length > 0) checkIntersection(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        });
+
+        // Búsqueda por coordenadas
+        window.searchCoordinate = function() {
+            const inputVal = document.getElementById('coord-input').value.trim();
+            if(!inputVal) return;
+            const starFound = clickableObjects.find(star => star.userData.coord === inputVal);
+            if(starFound) {
+                openModal(starFound.userData);
+                document.getElementById('coord-input').value = ""; 
+            } else {
+                alert("La coordenada '" + inputVal + "' no se encuentra. Revisa tu mapa estelar.");
+            }
+        };
+
+        document.getElementById('coord-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') searchCoordinate();
+        });
 
         function animate() {
             requestAnimationFrame(animate);
